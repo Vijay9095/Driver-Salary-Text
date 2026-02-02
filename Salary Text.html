@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMROADWAYS Drivers Salary</title>
+    <!-- SheetJS for Excel functionality -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-hover: #15803d;
+            --danger: #dc2626;
+            --bg-body: #f9fafb;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --text-light: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Layout & Card */
+        .app-container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .icon-box {
+            padding: 0.5rem;
+            background: #dbeafe;
+            color: #2563eb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 { font-size: 1.25rem; font-weight: 700; color: #111827; }
+        p.subtitle { font-size: 0.875rem; color: var(--text-muted); }
+
+        .header-actions { display: flex; gap: 0.75rem; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.75rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: var(--success-hover); }
+        .btn-outline { background: white; border-color: var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: #f9fafb; }
+        .btn-icon { padding: 0.5rem; }
+        .btn-danger-text { color: var(--text-light); background: transparent; }
+        .btn-danger-text:hover { color: var(--danger); background: #fef2f2; }
+
+        /* Main Content Area */
+        main {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        /* Tables */
+        .table-container {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+        
+        thead { background: #f9fafb; }
+        th { 
+            padding: 0.75rem 1.5rem; 
+            font-weight: 600; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+        }
+        
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #f0f9ff; cursor: pointer; }
+        
+        td { padding: 0.75rem 1.5rem; color: var(--text-main); }
+        td.num-col { text-align: right; font-family: 'Courier New', monospace; font-weight: 600; }
+        .text-green { color: var(--success); }
+        .text-red { color: var(--danger); }
+        .text-gray { color: var(--text-light); }
+        .text-bold { font-weight: 600; }
+        .bg-gray { background-color: #f9fafb; }
+
+        /* Form */
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .balance-card {
+            margin-left: auto;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border-radius: 8px;
+            text-align: right;
+        }
+        .balance-label { display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .balance-value { font-size: 1.25rem; font-weight: 700; }
+        .balance-val-neg { color: var(--danger); }
+
+        .entry-form {
+            background: white;
+            border: 1px solid #bfdbfe; /* blue-200 */
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .entry-form::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .form-label { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); }
+        
+        .input-field {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+        .input-field[type="number"] { text-align: right; font-family: monospace; }
+        .input-green { color: var(--success); font-weight: 700; }
+        .input-red { color: var(--danger); font-weight: 700; }
+
+        .col-span-2 { grid-column: span 2; }
+        .col-span-4 { grid-column: span 4; }
+        .col-span-12 { grid-column: span 12; display: flex; justify-content: flex-end; margin-top: 0.5rem;}
+
+        /* Empty State */
+        .empty-state {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            background: #f9fafb;
+        }
+        .empty-icon {
+            margin: 0 auto 1rem;
+            width: 64px;
+            height: 64px;
+            background: #dbeafe;
+            color: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .empty-btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1.5rem;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: #1f2937;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease-out forwards;
+            max-width: 300px;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Helper to hide file inputs */
+        .hidden-file { display: none; }
+        
+        /* Footer/Totals */
+        tfoot { font-weight: 700; background: #f9fafb; }
+        tfoot td { border-top: 2px solid var(--border); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .col-span-2, .col-span-4 { grid-column: span 1; }
+            .header-actions { width: 100%; flex-direction: column; }
+            .header-actions .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="header-title">
+                <div class="icon-box">
+                    <!-- FileSpreadsheet Icon -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M8 9h2"/></svg>
+                </div>
+                <div>
+                    <h1>MMROADWAYS Drivers Salary</h1>
+                    <p class="subtitle">Manage expenses and deposits</p>
+                </div>
+            </div>
+            
+            <div class="header-actions" id="header-actions">
+                <!-- Injected via JS based on view -->
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="app-content">
+            <!-- Views injected here -->
+        </main>
+    </div>
+
+    <script>
+        /**
+         * STATE MANAGEMENT
+         */
+        const STORE_KEY = 'driver_app_data';
+        
+        let state = {
+            view: 'list', // 'list' or 'detail'
+            drivers: [],
+            transactions: {}, // { "Driver Name": [TransactionObj, ...] }
+            selectedDriverName: null
+        };
+
+        // Initial Load
+        function init() {
+            loadData();
+            renderHeader();
+            renderView();
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem(STORE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                } catch (e) {
+                    console.error("Failed to load data", e);
+                }
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORE_KEY, JSON.stringify({
+                drivers: state.drivers,
+                transactions: state.transactions
+            }));
+        }
+
+        /**
+         * LOGIC & HELPERS
+         */
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        function formatCurrency(num) {
+            return parseFloat(num).toFixed(2);
+        }
+
+        function sanitizeSheetName(name, usedNames) {
+            let sheetName = name ? name.substring(0, 30) : "Sheet";
+            sheetName = sheetName.replace(/[\\/?*[\]]/g, "");
+            
+            let uniqueSheetName = sheetName;
+            let counter = 1;
+            while (usedNames.has(uniqueSheetName)) {
+                uniqueSheetName = `${sheetName.substring(0, 25)}_${counter}`;
+                counter++;
+            }
+            usedNames.add(uniqueSheetName);
+            return uniqueSheetName;
+        }
+
+        function calculateBalances(transactions) {
+            let runningBalance = 0;
+            return transactions.map((t, index) => {
+                runningBalance += t.amount - t.bankDeposit;
+                return { ...t, sNo: index + 1, balance: runningBalance };
+            });
+        }
+
+        function getDriverTransactions(driverName) {
+            return calculateBalances(state.transactions[driverName] || []);
+        }
+
+        /**
+         * ACTIONS
+         */
+
+        function setView(viewName, driverName = null) {
+            state.view = viewName;
+            state.selectedDriverName = driverName;
+            renderHeader();
+            renderView();
+        }
+
+        function addDriver(driver) {
+            state.drivers.push(driver);
+            saveData();
+            renderView();
+        }
+
+        function addTransaction(t) {
+            const name = state.selectedDriverName;
+            if (!state.transactions[name]) state.transactions[name] = [];
+            
+            // Add new transaction
+            const transactions = state.transactions[name];
+            const lastBalance = transactions.length > 0 ? transactions[transactions.length - 1].balance : 0;
+            
+            const newTrans = {
+                id: generateId(),
+                date: t.date,
+                description: t.description,
+                amount: parseFloat(t.amount) || 0,
+                bankDeposit: parseFloat(t.bankDeposit) || 0,
+                balance: lastBalance + (parseFloat(t.amount) || 0) - (parseFloat(t.bankDeposit) || 0)
+            };
+            
+            transactions.push(newTrans);
+            saveData();
+            renderView(); // Re-render to show updated list
+        }
+
+        function deleteTransaction(id) {
+            const name = state.selectedDriverName;
+            const transactions = state.transactions[name] || [];
+            const filtered = transactions.filter(t => t.id !== id);
+            
+            // Recalculate balances for remaining
+            state.transactions[name] = calculateBalances(filtered);
+            saveData();
+            renderView();
+        }
+
+        /**
+         * IMPORT / EXPORT LOGIC
+         */
+
+        function handleImportList(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const bstr = evt.target.result;
+                const wb = XLSX.read(bstr, { type: 'binary' });
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+                const newDrivers = [];
+                for (let i = 1; i < data.length; i++) {
+                    const row = data[i];
+                    if (row && row.length >= 2) {
+                        newDrivers.push({ sNo: row[0], name: row[1] });
+                    }
+                }
+                
+                state.drivers = newDrivers;
+                saveData();
+                renderView();
+                showToast(`Imported ${newDrivers.length} drivers.`);
+                e.target.value = ''; // Reset
+            };
+            reader.readAsBinaryString(file);
+        }
+
+        function handleFullImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const bstr = evt.target.result;
+                const wb = XLSX.read(bstr, { type: 'binary' });
+
+                // 1. Parse Drivers
+                let newDrivers = [...state.drivers];
+                if (wb.SheetNames.includes("Main Page")) {
+                    const mainWs = wb.Sheets["Main Page"];
+                    const mainData = XLSX.utils.sheet_to_json(mainWs, { header: 1 });
+                    const importedDrivers = [];
+                    for (let i = 1; i < mainData.length; i++) {
+                        const row = mainData[i];
+                        if (row && row.length >= 2 && row[1]) {
+                            importedDrivers.push({ sNo: row[0] || importedDrivers.length + 1, name: row[1] });
+                        }
+                    }
+                    if (importedDrivers.length > 0) newDrivers = importedDrivers;
+                }
+                state.drivers = newDrivers;
+
+                // 2. Parse Transactions
+                const newTransactions = {};
+                const usedNames = new Set(["Main Page"]);
+
+                newDrivers.forEach(driver => {
+                    const sheetName = sanitizeSheetName(driver.name, usedNames);
+                    if (wb.SheetNames.includes(sheetName)) {
+                        const ws = wb.Sheets[sheetName];
+                        const rawData = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                        const driverTrans = [];
+                        let runningBalance = 0;
+
+                        for (let i = 1; i < rawData.length; i++) {
+                            const row = rawData[i];
+                            // Basic validation
+                            if (!row || (!row[1] && !row[2])) continue;
+                            if (String(row[1]).toLowerCase().includes('total')) continue;
+
+                            const amount = parseFloat(row[3]) || 0;
+                            const deposit = parseFloat(row[4]) || 0;
+                            runningBalance += amount - deposit;
+
+                            driverTrans.push({
+                                id: generateId(),
+                                date: row[1] || new Date().toISOString().split('T')[0],
+                                description: row[2] || '',
+                                amount: amount,
+                                bankDeposit: deposit,
+                                balance: runningBalance
+                            });
+                        }
+                        newTransactions[driver.name] = driverTrans;
+                    } else {
+                        // Keep existing if no update
+                        newTransactions[driver.name] = state.transactions[driver.name] || [];
+                    }
+                });
+
+                state.transactions = newTransactions;
+                saveData();
+                renderView();
+                showToast("Data imported successfully!");
+                e.target.value = '';
+            };
+            reader.readAsBinaryString(file);
+        }
+
+        function handleExportAll() {
+            if (state.drivers.length === 0) {
+                showToast("No drivers to export");
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            // 1. Calculate unique sheet names
+            const finalSheetNames = [];
+            const usedNames = new Set(["Main Page"]);
+            state.drivers.forEach(driver => {
+                finalSheetNames.push(sanitizeSheetName(driver.name, usedNames));
+            });
+
+            // 2. Create "Main Page"
+            const mainPageData = [["S.No", "Driver Name"]];
+            state.drivers.forEach((driver, idx) => {
+                mainPageData.push([driver.sNo, driver.name]);
+            });
+            const mainWs = XLSX.utils.aoa_to_sheet(mainPageData);
+            
+            // Add Hyperlinks
+            state.drivers.forEach((driver, idx) => {
+                const rowIndex = idx + 1;
+                const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: 1 });
+                const targetSheetName = finalSheetNames[idx];
+                if (!mainWs[cellRef]) mainWs[cellRef] = { v: driver.name, t: 's' };
+                const safeName = targetSheetName.includes(' ') ? `'${targetSheetName}'` : targetSheetName;
+                mainWs[cellRef].l = { Target: `#${safeName}!A1` };
+            });
+            mainWs['!cols'] = [{ wch: 10 }, { wch: 40 }];
+            XLSX.utils.book_append_sheet(wb, mainWs, "Main Page");
+
+            // 3. Create Driver Sheets
+            state.drivers.forEach((driver, idx) => {
+                const trans = getDriverTransactions(driver.name);
+                const sheetData = [["S.No", "Date", "Description", "Amount", "Bank Deposit", "Balance"]];
+                trans.forEach(t => {
+                    sheetData.push([t.sNo, t.date, t.description, t.amount, t.bankDeposit, t.balance]);
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(sheetData);
+                ws['!cols'] = [{ wch: 8 }, { wch: 12 }, { wch: 30 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
+                XLSX.utils.book_append_sheet(wb, ws, finalSheetNames[idx]);
+            });
+
+            XLSX.writeFile(wb, "MMROADWAYS_Driver_Accounts.xlsx");
+        }
+
+        /**
+         * RENDERING
+         */
+
+        function renderHeader() {
+            const container = document.getElementById('header-actions');
+            container.innerHTML = '';
+
+            if (state.view === 'list') {
+                // Import Button
+                const importBtn = document.createElement('label');
+                importBtn.className = 'btn btn-outline';
+                importBtn.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Import Excel
+                `;
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.className = 'hidden-file';
+                input.accept = '.xlsx, .xls';
+                input.onchange = handleFullImport;
+                importBtn.appendChild(input);
+                container.appendChild(importBtn);
+
+                // Export Button
+                if (state.drivers.length > 0) {
+                    const exportBtn = document.createElement('button');
+                    exportBtn.className = 'btn btn-success';
+                    exportBtn.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Export Excel
+                    `;
+                    exportBtn.onclick = handleExportAll;
+                    container.appendChild(exportBtn);
+                }
+            }
+        }
+
+        function renderView() {
+            const container = document.getElementById('app-content');
+            container.innerHTML = '';
+
+            if (state.view === 'list') {
+                renderDriverListView(container);
+            } else {
+                renderDriverDetailView(container);
+            }
+        }
+
+        function renderDriverListView(container) {
+            if (state.drivers.length === 0) {
+                // Empty State
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        </div>
+                        <h3>Upload Driver List</h3>
+                        <p style="color:var(--text-muted); margin-top:0.5rem;">Upload an Excel file with columns "S.No" and "Driver Name"</p>
+                        <button id="empty-upload-btn" class="empty-btn">Select Excel File</button>
+                        <input id="empty-upload-input" type="file" class="hidden-file" accept=".xlsx, .xls">
+                        <p style="margin-top:1rem; font-size:0.75rem; color:var(--text-light);">Or export a template to get started.</p>
+                    </div>
+                `;
+                container.querySelector('#empty-upload-btn').onclick = () => container.querySelector('#empty-upload-input').click();
+                container.querySelector('#empty-upload-input').onchange = handleImportList;
+                return;
+            }
+
+            // List Table
+            let html = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h2>Drivers List (${state.drivers.length})</h2>
+                    <label class="btn btn-outline" style="font-size:0.8rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Replace List
+                        <input type="file" class="hidden-file" accept=".xlsx, .xls">
+                    </label>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:100px;">S.No</th>
+                                <th>Driver Name</th>
+                                <th style="text-align:right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            state.drivers.forEach((driver, idx) => {
+                html += `
+                    <tr data-idx="${idx}">
+                        <td>${driver.sNo}</td>
+                        <td class="text-bold">${driver.name}</td>
+                        <td style="text-align:right;">
+                            <button class="btn btn-sm btn-primary" onclick="setView('detail', '${driver.name.replace(/'/g, "\\'")}')">
+                                Open
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+
+            // Attach list event listener
+            const listInput = container.querySelector('input[type="file"]');
+            if(listInput) listInput.onchange = handleImportList;
+        }
+
+        function renderDriverDetailView(container) {
+            const driverName = state.selectedDriverName;
+            const transactions = getDriverTransactions(driverName);
+            const lastBalance = transactions.length > 0 ? transactions[transactions.length - 1].balance : 0;
+
+            // Helper to render form with live update logic
+            const renderForm = () => {
+                const today = new Date().toISOString().split('T')[0];
+                return `
+                    <div class="detail-header">
+                        <button class="btn btn-outline btn-icon" onclick="setView('list')" title="Back">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                        </button>
+                        <div>
+                            <h2>${driverName}</h2>
+                            <p class="subtitle">ID: ${state.drivers.find(d => d.name === driverName)?.sNo || 'N/A'}</p>
+                        </div>
+                        <div class="balance-card">
+                            <span class="balance-label">Current Balance</span>
+                            <div class="balance-value ${lastBalance < 0 ? 'balance-val-neg' : ''}">${formatCurrency(lastBalance)}</div>
+                        </div>
+                    </div>
+
+                    <form id="trans-form" class="entry-form" onsubmit="event.preventDefault(); handleTransactionSubmit();">
+                        <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem; align-items:center;">
+                            <div style="background:#dbeafe; padding:4px; border-radius:4px; color:#2563eb;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </div>
+                            <span style="font-size:0.8rem; font-weight:700; text-transform:uppercase;">New Entry</span>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="col-span-2 form-group">
+                                <label class="form-label">Date</label>
+                                <input type="date" name="date" required class="input-field" value="${today}">
+                            </div>
+                            <div class="col-span-4 form-group">
+                                <label class="form-label">Description</label>
+                                <input type="text" name="description" required placeholder="Expense details..." class="input-field">
+                            </div>
+                            <div class="col-span-2 form-group">
+                                <label class="form-label">Amount (+)</label>
+                                <input type="number" name="amount" placeholder="0.00" class="input-field input-green" id="inp-amount">
+                            </div>
+                            <div class="col-span-2 form-group">
+                                <label class="form-label">Bank Deposit (-)</label>
+                                <input type="number" name="bankDeposit" placeholder="0.00" class="input-field input-red" id="inp-deposit">
+                            </div>
+                            <div class="col-span-2 form-group">
+                                <label class="form-label">Net Balance</label>
+                                <div id="live-balance" class="input-field" style="background:#f3f4f6; cursor:default; display:flex; align-items:center;">
+                                    ${formatCurrency(lastBalance)}
+                                </div>
+                            </div>
+                            <div class="col-span-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                    Save Entry
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                `;
+            };
+
+            // Helper to render table
+            const renderTable = () => {
+                let html = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="text-align:center; width:60px;">S.No</th>
+                                    <th style="width:130px;">Date</th>
+                                    <th>Description</th>
+                                    <th class="text-green" style="text-align:right;">Amount</th>
+                                    <th class="text-red" style="text-align:right;">Bank Deposit</th>
+                                    <th class="text-bold" style="text-align:right; background:#f9fafb;">Balance</th>
+                                    <th style="text-align:center; width:60px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                if (transactions.length === 0) {
+                    html += `<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-light);">No entries yet. Add details above.</td></tr>`;
+                } else {
+                    transactions.forEach((t, idx) => {
+                        html += `
+                            <tr>
+                                <td style="text-align:center;">${t.sNo}</td>
+                                <td>${t.date}</td>
+                                <td class="text-bold">${t.description}</td>
+                                <td class="num-col text-green">${t.amount > 0 ? formatCurrency(t.amount) : '-'}</td>
+                                <td class="num-col text-red">${t.bankDeposit > 0 ? formatCurrency(t.bankDeposit) : '-'}</td>
+                                <td class="num-col text-bold bg-gray">${formatCurrency(t.balance)}</td>
+                                <td style="text-align:center;">
+                                    <button class="btn btn-danger-text btn-icon" onclick="deleteTransaction('${t.id}')" title="Delete Entry">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += `</tbody>`;
+
+                // Footer Totals
+                if (transactions.length > 0) {
+                    const totalAmt = transactions.reduce((acc, t) => acc + (t.amount || 0), 0);
+                    const totalDep = transactions.reduce((acc, t) => acc + (t.bankDeposit || 0), 0);
+                    
+                    html += `
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align:right;">Total:</td>
+                                <td class="text-green" style="text-align:right;">${formatCurrency(totalAmt)}</td>
+                                <td class="text-red" style="text-align:right;">${formatCurrency(totalDep)}</td>
+                                <td class="text-bold" style="text-align:right; background:#f3f4f6;">${formatCurrency(lastBalance)}</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    `;
+                }
+
+                html += `</table></div>`;
+                return html;
+            };
+
+            container.innerHTML = renderForm() + renderTable();
+
+            // Live Calculation Setup
+            const amtInp = document.getElementById('inp-amount');
+            const depInp = document.getElementById('inp-deposit');
+            const liveBal = document.getElementById('live-balance');
+            
+            const updateLiveBalance = () => {
+                const amt = parseFloat(amtInp.value) || 0;
+                const dep = parseFloat(depInp.value) || 0;
+                const projected = lastBalance + amt - dep;
+                liveBal.textContent = formatCurrency(projected);
+                if (projected < 0) {
+                    liveBal.classList.add('text-red');
+                    liveBal.classList.remove('text-gray');
+                } else {
+                    liveBal.classList.remove('text-red');
+                    liveBal.classList.add('text-gray');
+                }
+            };
+
+            amtInp.addEventListener('input', updateLiveBalance);
+            depInp.addEventListener('input', updateLiveBalance);
+        }
+
+        function handleTransactionSubmit() {
+            const form = document.getElementById('trans-form');
+            const formData = new FormData(form);
+            addTransaction({
+                date: formData.get('date'),
+                description: formData.get('description'),
+                amount: formData.get('amount'),
+                bankDeposit: formData.get('bankDeposit')
+            });
+            showToast("Entry added successfully");
+        }
+
+        // Initialize App
+        init();
+
+    </script>
+</body>
+</html>
